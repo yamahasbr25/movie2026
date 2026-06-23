@@ -3,177 +3,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MovieStream | Watch Latest Movies</title>
+    <meta name="description" content="Watch the latest trending movies, explore popular titles, and stream your favorite films in high quality.">
+    <title>Moviflow | Discover & Stream Movies</title>
+    <!-- FontAwesome for Professional Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Reset & Base */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #0f171e; color: #fff; line-height: 1.6; }
+        /* CSS Variables for Consistent Theming */
+        :root {
+            --bg-color: #0b0f19;
+            --surface-color: #1a2235;
+            --accent-color: #f5c518; /* IMDB Yellow */
+            --accent-hover: #e0b416;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aab2;
+            --border-color: #2c394f;
+            --gap-tight: 10px;
+        }
+
+        /* Reset & Base Styles */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-primary); line-height: 1.5; overflow-x: hidden; }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        /* Professional Navigation */
+        header { background-color: rgba(11, 15, 25, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000; }
+        .nav-container { max-width: 1400px; margin: 0 auto; padding: 0.8rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+        .logo { font-size: 1.5rem; font-weight: 800; color: var(--accent-color); cursor: pointer; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .logo i { font-size: 1.8rem; }
         
-        /* Navbar */
-        header { background: #1a242f; padding: 1.2rem 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
-        header h1 { color: #00a8e1; cursor: pointer; font-size: 1.8rem; }
+        .nav-links { display: flex; gap: 1.5rem; font-size: 0.95rem; font-weight: 500; }
+        .nav-links a { transition: color 0.2s; cursor: pointer; color: var(--text-secondary); }
+        .nav-links a:hover, .nav-links a.active { color: var(--text-primary); }
 
-        /* Layout */
-        .container { padding: 2rem 5%; max-width: 1200px; margin: auto; min-height: 80vh; }
+        .search-box { display: flex; align-items: center; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 20px; padding: 0.4rem 1rem; width: 300px; transition: border-color 0.3s; }
+        .search-box:focus-within { border-color: var(--accent-color); }
+        .search-box input { background: transparent; border: none; color: var(--text-primary); outline: none; width: 100%; font-size: 0.9rem; margin-left: 8px; }
 
-        /* Home Page Grid */
-        #home-page { display: block; }
-        .section-title { margin-bottom: 1.5rem; font-size: 1.8rem; border-left: 4px solid #00a8e1; padding-left: 10px; }
-        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
-        .movie-card { background: #1a242f; border-radius: 10px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; }
-        .movie-card:hover { transform: translateY(-8px); box-shadow: 0 10px 20px rgba(0, 168, 225, 0.2); }
-        .movie-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; border-bottom: 2px solid #00a8e1; }
-        .movie-info { padding: 1rem; }
-        .movie-title { font-size: 1rem; font-weight: bold; margin-bottom: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .movie-rating { color: #f5c518; font-weight: bold; font-size: 0.9rem; }
+        /* Layout Main */
+        main { max-width: 1400px; margin: 0 auto; padding: 2rem; min-height: 85vh; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+        .section-title { font-size: 1.4rem; font-weight: 600; text-transform: uppercase; }
 
-        /* AGC / Details Page */
-        #details-page { display: none; }
-        .btn-back { background: transparent; color: #00a8e1; border: none; cursor: pointer; font-size: 1.1rem; margin-bottom: 20px; font-weight: bold; }
-        .btn-back:hover { text-decoration: underline; }
+        /* Tight Grid for Movies */
+        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: var(--gap-tight); }
+        .movie-card { background: var(--surface-color); border-radius: 6px; overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
+        .movie-card:hover { transform: scale(1.04); z-index: 10; box-shadow: 0 10px 20px rgba(0,0,0,0.8); }
         
-        .details-container { display: flex; flex-direction: column; gap: 2rem; background: #1a242f; padding: 2rem; border-radius: 10px; }
-        @media (min-width: 768px) { .details-container { flex-direction: row; } }
+        .poster-wrapper { position: relative; width: 100%; padding-top: 150%; /* 2:3 Aspect Ratio */ background: #111; }
+        .poster-wrapper img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+        .rating-badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; color: var(--accent-color); border: 1px solid var(--accent-color); }
         
-        .details-poster { width: 100%; max-width: 300px; border-radius: 8px; margin: 0 auto; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .details-content { flex: 1; }
-        .details-title { font-size: 2.5rem; margin-bottom: 0.5rem; }
-        .details-tagline { font-size: 1.2rem; font-style: italic; color: #888; margin-bottom: 1.5rem; }
-        .details-meta { display: flex; flex-wrap: wrap; gap: 15px; color: #ccc; margin-bottom: 1.5rem; font-size: 0.9rem; background: #0f171e; padding: 10px; border-radius: 5px; }
-        .details-overview { font-size: 1.1rem; margin-bottom: 2rem; color: #e1e1e1; line-height: 1.8; }
+        .movie-info { padding: 0.6rem; }
+        .movie-title { font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+        .movie-year { font-size: 0.8rem; color: var(--text-secondary); }
 
-        /* Watch Stream Button */
-        .btn-watch { display: inline-flex; align-items: center; background: #00a8e1; color: white; padding: 15px 30px; font-size: 1.2rem; font-weight: bold; border-radius: 50px; cursor: pointer; border: none; transition: background 0.3s ease, transform 0.2s; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-watch:hover { background: #0082b3; transform: scale(1.05); }
-        .btn-watch svg { width: 24px; height: 24px; margin-right: 10px; fill: currentColor; }
+        /* Detail/AGC Page */
+        #detail-view { display: none; }
+        .backdrop-header { position: relative; width: 100%; height: 50vh; min-height: 400px; border-radius: 12px; overflow: hidden; margin-bottom: 2rem; box-shadow: inset 0 -100px 100px -10px var(--bg-color); }
+        .backdrop-header img { width: 100%; height: 100%; object-fit: cover; opacity: 0.4; }
+        
+        .detail-content { position: absolute; bottom: 0; left: 0; width: 100%; padding: 2rem; display: flex; gap: 2rem; align-items: flex-end; background: linear-gradient(to top, var(--bg-color) 10%, transparent); }
+        .detail-poster { width: 220px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 2px solid var(--surface-color); display: none; }
+        
+        .detail-text { flex: 1; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
+        .detail-title { font-size: 2.8rem; font-weight: 800; line-height: 1.1; margin-bottom: 0.5rem; }
+        .detail-meta { display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.95rem; color: #ddd; margin-bottom: 1rem; }
+        .detail-meta span { background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; backdrop-filter: blur(4px); }
+        
+        .action-buttons { display: flex; gap: 1rem; margin-top: 1.5rem; }
+        .btn { padding: 0.8rem 1.8rem; font-size: 1rem; font-weight: 600; border-radius: 30px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; border: none; }
+        .btn-primary { background: var(--accent-color); color: #000; }
+        .btn-primary:hover { background: var(--accent-hover); transform: scale(1.05); }
+        .btn-secondary { background: rgba(255,255,255,0.2); color: #fff; backdrop-filter: blur(5px); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.3); }
+
+        /* Extended Data Grid (Cast, Synopsis) */
+        .data-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-top: 2rem; }
+        .synopsis h3, .cast-crew h3 { border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem; color: var(--accent-color); }
+        .overview-text { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.8; margin-bottom: 2rem; }
+        
+        .cast-list { display: flex; flex-wrap: wrap; gap: var(--gap-tight); }
+        .cast-item { background: var(--surface-color); padding: 5px 10px; border-radius: 20px; font-size: 0.85rem; border: 1px solid var(--border-color); }
+
+        .crew-info { background: var(--surface-color); padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--border-color); }
+        .crew-info div { margin-bottom: 0.5rem; font-size: 0.95rem; }
+        .crew-label { color: var(--text-secondary); font-weight: 600; display: inline-block; width: 80px; }
+
+        /* Footer */
+        footer { border-top: 1px solid var(--border-color); padding: 2rem; text-align: center; color: var(--text-secondary); font-size: 0.9rem; margin-top: 2rem; }
 
         /* Loader */
-        .loader { text-align: center; padding: 3rem; font-size: 1.5rem; color: #00a8e1; width: 100%; grid-column: 1 / -1; }
+        .spinner { text-align: center; padding: 4rem; font-size: 2rem; color: var(--accent-color); width: 100%; }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .data-grid { grid-template-columns: 1fr; }
+        }
+        @media (min-width: 768px) {
+            .detail-poster { display: block; }
+        }
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .search-box { width: 200px; }
+            .detail-title { font-size: 2rem; }
+            .movie-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+        }
     </style>
 </head>
 <body>
 
+    <!-- Professional Navbar -->
     <header>
-        <h1 onclick="goHome()">🎥 MovieStream</h1>
+        <nav class="nav-container">
+            <div class="logo" onclick="loadHome()">
+                <i class="fa-solid fa-film"></i> Moviflow
+            </div>
+            <ul class="nav-links">
+                <li><a class="active" onclick="loadHome()">Home</a></li>
+                <li><a href="#">Movies</a></li>
+                <li><a href="#">TV Shows</a></li>
+                <li><a href="#">Trending</a></li>
+            </ul>
+            <form class="search-box" onsubmit="handleSearch(event)">
+                <i class="fa-solid fa-magnifying-glass" style="color:var(--text-secondary)"></i>
+                <input type="search" id="searchInput" placeholder="Search movies...">
+            </form>
+        </nav>
     </header>
 
-    <div class="container">
-        <div id="home-page">
-            <h2 class="section-title">Trending Today</h2>
-            <div id="movies" class="movie-grid">
-                <div class="loader">Loading movies...</div>
+    <main>
+        <!-- Home View: Grid Layout -->
+        <section id="home-view">
+            <div class="section-header">
+                <h2 class="section-title" id="grid-title">Popular This Week</h2>
             </div>
-        </div>
+            <div id="movies" class="movie-grid">
+                <div class="spinner"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
+            </div>
+        </section>
 
-        <div id="details-page">
-            <button class="btn-back" onclick="goHome()">&larr; Back to Home</button>
-            <div id="movie-details" class="details-container">
-                </div>
+        <!-- Detail/AGC View -->
+        <article id="detail-view">
+            <div id="movie-detail-content">
+                <!-- Injected via JS -->
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Moviflow. All movies are provided by third-party APIs.</p>
+        <div style="margin-top: 10px; gap: 15px; display: flex; justify-content: center;">
+            <a href="#">DMCA</a> | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a>
         </div>
-    </div>
+    </footer>
 
     <script>
-        // --- KONFIGURASI API ---
-        // Ganti 'YOUR_API_KEY_HERE' dengan API Key dari TMDB
-        const API_KEY = 'ff4a228b2bde4cea37efcc472696d620'; 
+        // ==========================================
+        // CONFIGURATION & API SETUP
+        // ==========================================
+        const API_KEY = 'ff4a228b2bde4cea37efcc472696d620'; // <-- MASUKKAN TMDB API KEY DI SINI
         const BASE_URL = 'https://api.themoviedb.org/3';
-        const IMG_URL = 'https://image.tmdb.org/t/p/w500';
+        const IMG_URL_W500 = 'https://image.tmdb.org/t/p/w500';
+        const IMG_URL_ORIGINAL = 'https://image.tmdb.org/t/p/original';
 
-        const homePage = document.getElementById('home-page');
-        const detailsPage = document.getElementById('details-page');
+        // DOM Elements
+        const homeView = document.getElementById('home-view');
+        const detailView = document.getElementById('detail-view');
         const moviesGrid = document.getElementById('movies');
-        const movieDetailsContainer = document.getElementById('movie-details');
+        const gridTitle = document.getElementById('grid-title');
+        const detailContainer = document.getElementById('movie-detail-content');
+        const searchInput = document.getElementById('searchInput');
 
-        // Mengambil data film trending untuk Home Page
-        async function getTrendingMovies() {
+        // ==========================================
+        // FETCH FUNCTIONS
+        // ==========================================
+        
+        // Load Trending Movies
+        async function fetchTrending() {
+            showSpinner(moviesGrid);
+            gridTitle.innerText = "Popular This Week";
             try {
-                // Endpoint untuk film yang sedang tren hari ini
-                const res = await fetch(`${BASE_URL}/trending/movie/day?api_key=${API_KEY}`);
+                const res = await fetch(`${BASE_URL}/trending/movie/week?api_key=${API_KEY}`);
                 const data = await res.json();
-                
-                if(data.success === false) {
-                    moviesGrid.innerHTML = '<p style="color:red;">Error: Invalid API Key. Please insert your TMDB API Key in the code.</p>';
-                    return;
-                }
-                displayMovies(data.results);
-            } catch (error) {
-                moviesGrid.innerHTML = '<p>Error loading movies. Check your internet connection.</p>';
+                renderMovies(data.results);
+            } catch (err) {
+                moviesGrid.innerHTML = `<p style="color:red">Failed to fetch data. Check API Key or Network.</p>`;
             }
         }
 
-        // Menampilkan grid film di Home
-        function displayMovies(movies) {
+        // Search Movies
+        async function handleSearch(e) {
+            e.preventDefault();
+            const query = searchInput.value.trim();
+            if(!query) return;
+
+            loadHomeView(); // Ensure we are on home view
+            showSpinner(moviesGrid);
+            gridTitle.innerText = `Search Results: "${query}"`;
+            
+            try {
+                const res = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`);
+                const data = await res.json();
+                renderMovies(data.results);
+            } catch (err) {
+                moviesGrid.innerHTML = `<p>Error fetching search results.</p>`;
+            }
+        }
+
+        // Load Single Movie Detail (AGC logic)
+        // using append_to_response=credits to get Cast & Crew in 1 API call
+        async function fetchMovieDetail(id) {
+            loadDetailView();
+            showSpinner(detailContainer);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            try {
+                const res = await fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&append_to_response=credits`);
+                const movie = await res.json();
+                renderDetail(movie);
+                
+                // Dynamic SEO Title Update
+                document.title = `${movie.title} (${movie.release_date.split('-')[0]}) - Watch on Moviflow`;
+            } catch (err) {
+                detailContainer.innerHTML = `<p>Error loading details.</p>`;
+            }
+        }
+
+        // ==========================================
+        // RENDER FUNCTIONS
+        // ==========================================
+
+        function renderMovies(movies) {
             moviesGrid.innerHTML = '';
+            if(movies.length === 0) {
+                moviesGrid.innerHTML = '<p>No movies found.</p>';
+                return;
+            }
+
             movies.forEach(movie => {
-                if (!movie.poster_path) return; // Skip film tanpa poster
+                if (!movie.poster_path) return;
+                
+                const releaseYear = movie.release_date ? movie.release_date.split('-')[0] : 'N/A';
+                const rating = movie.vote_average ? movie.vote_average.toFixed(1) : 'NR';
 
-                const movieEl = document.createElement('div');
-                movieEl.classList.add('movie-card');
-                // Mengirim ID film ke fungsi detail saat diklik
-                movieEl.onclick = () => showMovieDetails(movie.id);
+                const card = document.createElement('div');
+                card.classList.add('movie-card');
+                card.onclick = () => fetchMovieDetail(movie.id);
 
-                movieEl.innerHTML = `
-                    <img src="${IMG_URL + movie.poster_path}" alt="${movie.title}" loading="lazy">
+                card.innerHTML = `
+                    <div class="poster-wrapper">
+                        <img src="${IMG_URL_W500 + movie.poster_path}" alt="${movie.title}" loading="lazy">
+                        <div class="rating-badge"><i class="fa-solid fa-star"></i> ${rating}</div>
+                    </div>
                     <div class="movie-info">
-                        <div class="movie-title">${movie.title}</div>
-                        <div class="movie-rating">⭐ ${movie.vote_average.toFixed(1)}</div>
+                        <div class="movie-title" title="${movie.title}">${movie.title}</div>
+                        <div class="movie-year">${releaseYear}</div>
                     </div>
                 `;
-                moviesGrid.appendChild(movieEl);
+                moviesGrid.appendChild(card);
             });
         }
 
-        // Mengambil detail film spesifik (AGC Logic)
-        async function showMovieDetails(id) {
-            homePage.style.display = 'none';
-            detailsPage.style.display = 'block';
-            movieDetailsContainer.innerHTML = '<div class="loader">Fetching streams...</div>';
-            window.scrollTo(0, 0);
+        function renderDetail(movie) {
+            const releaseYear = movie.release_date ? movie.release_date.split('-')[0] : 'N/A';
+            const genres = movie.genres.map(g => g.name).join(', ');
+            const backdrop = movie.backdrop_path ? IMG_URL_ORIGINAL + movie.backdrop_path : IMG_URL_W500 + movie.poster_path;
+            
+            // Extract Director
+            const directorObj = movie.credits.crew.find(member => member.job === 'Director');
+            const director = directorObj ? directorObj.name : 'Unknown';
 
-            try {
-                const res = await fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=en-US`);
-                const movie = await res.json();
+            // Extract Top 10 Cast
+            const topCast = movie.credits.cast.slice(0, 10).map(actor => 
+                `<span class="cast-item">${actor.name}</span>`
+            ).join('');
 
-                movieDetailsContainer.innerHTML = `
-                    <img src="${IMG_URL + movie.poster_path}" alt="${movie.title}" class="details-poster">
-                    <div class="details-content">
-                        <h2 class="details-title">${movie.title}</h2>
-                        <div class="details-tagline">${movie.tagline ? `"${movie.tagline}"` : ''}</div>
-                        
-                        <div class="details-meta">
-                            <span>📅 Release: ${movie.release_date}</span>
-                            <span>⭐ Rating: ${movie.vote_average.toFixed(1)} / 10</span>
-                            <span>⏱️ Duration: ${movie.runtime} min</span>
+            detailContainer.innerHTML = `
+                <div class="backdrop-header">
+                    <img src="${backdrop}" alt="Backdrop">
+                    <div class="detail-content">
+                        <img src="${IMG_URL_W500 + movie.poster_path}" alt="${movie.title}" class="detail-poster">
+                        <div class="detail-text">
+                            <h1 class="detail-title">${movie.title}</h1>
+                            <div class="detail-meta">
+                                <span><i class="fa-regular fa-calendar"></i> ${releaseYear}</span>
+                                <span><i class="fa-regular fa-clock"></i> ${movie.runtime} min</span>
+                                <span><i class="fa-solid fa-star" style="color:var(--accent-color)"></i> ${movie.vote_average.toFixed(1)}/10</span>
+                                <span>${genres}</span>
+                            </div>
+                            <i style="color: #aaa; font-size: 1.1rem;">${movie.tagline ? `"${movie.tagline}"` : ''}</i>
+                            
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="playStream('${movie.title}')">
+                                    <i class="fa-solid fa-play"></i> Watch Stream
+                                </button>
+                                <button class="btn btn-secondary" onclick="loadHome()">
+                                    <i class="fa-solid fa-arrow-left"></i> Back
+                                </button>
+                            </div>
                         </div>
-                        
-                        <p class="details-overview">${movie.overview}</p>
-                        
-                        <button class="btn-watch" onclick="playStream('${movie.title}')">
-                            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                            Watch Stream
-                        </button>
                     </div>
-                `;
-            } catch (error) {
-                movieDetailsContainer.innerHTML = '<p>Error loading movie details.</p>';
+                </div>
+
+                <div class="data-grid">
+                    <div class="synopsis">
+                        <h3>Storyline</h3>
+                        <p class="overview-text">${movie.overview}</p>
+                        
+                        <h3>Top Cast</h3>
+                        <div class="cast-list">
+                            ${topCast || 'Cast information not available.'}
+                        </div>
+                    </div>
+                    
+                    <aside class="cast-crew">
+                        <h3>Movie Info</h3>
+                        <div class="crew-info">
+                            <div><span class="crew-label">Director:</span> <span style="color:white;">${director}</span></div>
+                            <div><span class="crew-label">Status:</span> <span style="color:white;">${movie.status}</span></div>
+                            <div><span class="crew-label">Budget:</span> <span style="color:white;">$${movie.budget.toLocaleString()}</span></div>
+                            <div><span class="crew-label">Revenue:</span> <span style="color:white;">$${movie.revenue.toLocaleString()}</span></div>
+                            <div><span class="crew-label">Language:</span> <span style="color:white; text-transform:uppercase;">${movie.original_language}</span></div>
+                        </div>
+                    </aside>
+                </div>
+            `;
+        }
+
+        // ==========================================
+        // UTILITY & NAVIGATION
+        // ==========================================
+
+        function showSpinner(element) {
+            element.innerHTML = '<div class="spinner"><i class="fa-solid fa-circle-notch fa-spin"></i></div>';
+        }
+
+        function loadHome() {
+            loadHomeView();
+            document.title = "Moviflow | Discover & Stream Movies";
+            searchInput.value = '';
+            fetchTrending(); // Reset ke trending default
+        }
+
+        function loadHomeView() {
+            homeView.style.display = 'block';
+            detailView.style.display = 'none';
+        }
+
+        function loadDetailView() {
+            homeView.style.display = 'none';
+            detailView.style.display = 'block';
+        }
+
+        function playStream(title) {
+            // Logika untuk streaming / Direct Link / CPA Button
+            const userConfirm = confirm(`Connecting to secure servers to stream:\n"${title}"\n\nProceed to player?`);
+            if(userConfirm) {
+                // window.location.href = "YOUR_AFFILIATE_LINK_HERE";
+                alert("Redirecting to player...");
             }
         }
 
-        // Kembali ke Home
-        function goHome() {
-            homePage.style.display = 'block';
-            detailsPage.style.display = 'none';
-            window.scrollTo(0, 0);
-        }
-
-        // Fungsi Tombol Stream
-        function playStream(title) {
-            // Anda bisa mengganti alert ini dengan redirect ke URL player, CPA network, atau iframe.
-            alert(`Connecting to servers for: ${title}...\n\n[You can link this button to your actual player or affiliate link in the code]`);
-        }
-
-        // Inisialisasi awal
-        getTrendingMovies();
+        // Init App
+        fetchTrending();
     </script>
 </body>
 </html>
